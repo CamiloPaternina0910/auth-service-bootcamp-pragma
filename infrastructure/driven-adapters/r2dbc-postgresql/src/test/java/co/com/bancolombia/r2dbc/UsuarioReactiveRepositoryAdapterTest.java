@@ -2,7 +2,6 @@ package co.com.bancolombia.r2dbc;
 
 import co.com.bancolombia.model.usuario.Usuario;
 import co.com.bancolombia.r2dbc.entity.UsuarioEntity;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

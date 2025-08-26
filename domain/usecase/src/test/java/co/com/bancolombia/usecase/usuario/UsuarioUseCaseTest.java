@@ -3,6 +3,7 @@ package co.com.bancolombia.usecase.usuario;
 import co.com.bancolombia.model.usuario.Usuario;
 import co.com.bancolombia.model.usuario.gateways.UsuarioRepository;
 import co.com.bancolombia.usecase.usuario.exception.CorreoElectronicoDuplicadoException;
+import co.com.bancolombia.usecase.usuario.exception.SalarioInvalidoException;
 import co.com.bancolombia.usecase.usuario.exception.UsuarioNoEncontradoException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -69,6 +70,30 @@ public class UsuarioUseCaseTest {
     }
 
     @Test
+    void saveUsuario_salarioMenorQueCero() {
+        usuario.setSalarioBase(BigDecimal.valueOf(-1000));
+
+        when(repository.findByCorreoElectronico(usuario.getCorreoElectronico())).thenReturn(Mono.empty());
+        when(repository.save(usuario)).thenReturn(Mono.just(usuario));
+
+        StepVerifier.create(useCase.save(usuario))
+                .expectError(SalarioInvalidoException.class)
+                .verify();
+    }
+
+    @Test
+    void saveUsuario_salarioMayorQueMaximo() {
+        usuario.setSalarioBase(BigDecimal.valueOf(20_000_000));
+
+        when(repository.findByCorreoElectronico(usuario.getCorreoElectronico())).thenReturn(Mono.empty());
+        when(repository.save(usuario)).thenReturn(Mono.just(usuario));
+
+        StepVerifier.create(useCase.save(usuario))
+                .expectError(SalarioInvalidoException.class)
+                .verify();
+    }
+
+    @Test
     void findById_success() {
         when(repository.findById("1")).thenReturn(Mono.just(usuario));
 
@@ -96,6 +121,19 @@ public class UsuarioUseCaseTest {
         StepVerifier.create(useCase.update(usuario))
                 .expectNext(usuario)
                 .verifyComplete();
+    }
+
+    @Test
+    void updateUsuario_salarioInvalido() {
+        usuario.setSalarioBase(BigDecimal.valueOf(20_000_000));
+
+        when(repository.findById("1")).thenReturn(Mono.just(usuario));
+        when(repository.findByCorreoElectronico(usuario.getCorreoElectronico())).thenReturn(Mono.just(usuario));
+        when(repository.update(usuario)).thenReturn(Mono.just(usuario));
+
+        StepVerifier.create(useCase.update(usuario))
+                .expectError(SalarioInvalidoException.class)
+                .verify();
     }
 
     @Test

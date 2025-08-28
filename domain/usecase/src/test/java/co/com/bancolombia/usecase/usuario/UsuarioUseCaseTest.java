@@ -5,6 +5,7 @@ import co.com.bancolombia.model.usuario.gateways.UsuarioRepository;
 import co.com.bancolombia.usecase.usuario.exception.CorreoElectronicoDuplicadoException;
 import co.com.bancolombia.usecase.usuario.exception.SalarioInvalidoException;
 import co.com.bancolombia.usecase.usuario.exception.UsuarioNoEncontradoException;
+import co.com.bancolombia.usecase.usuario.validator.UsuarioValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,14 +25,15 @@ import static org.mockito.Mockito.*;
 public class UsuarioUseCaseTest {
 
     private UsuarioRepository repository;
+    private UsuarioValidator validator;
     private UsuarioUseCase useCase;
-
     private Usuario usuario;
 
     @BeforeEach
      void setUp() {
         repository = Mockito.mock(UsuarioRepository.class);
-        useCase = new UsuarioUseCase(repository);
+        validator = new UsuarioValidator(repository);
+        useCase = new UsuarioUseCase(repository, validator);
 
         usuario = new Usuario();
         usuario.setId("1");

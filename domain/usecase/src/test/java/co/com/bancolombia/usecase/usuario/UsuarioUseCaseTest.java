@@ -124,6 +124,24 @@ public class UsuarioUseCaseTest {
     }
 
     @Test
+    void updateUsuario_correoDuplicado() {
+        Usuario otroUsuario = new Usuario();
+        otroUsuario.setId("2"); // diferente ID
+        otroUsuario.setCorreoElectronico("camilo@example.com");
+
+        when(repository.findById("1")).thenReturn(Mono.just(usuario));
+        when(repository.findByCorreoElectronico("camilo@example.com"))
+                .thenReturn(Mono.just(otroUsuario));
+        when(repository.update(usuario)).thenReturn(Mono.just(usuario));
+
+        StepVerifier.create(useCase.update(usuario))
+                .expectErrorMatches(throwable ->
+                        throwable instanceof CorreoElectronicoDuplicadoException &&
+                                throwable.getMessage().contains("camilo@example.com"))
+                .verify();
+    }
+
+    @Test
     void updateUsuario_salarioInvalido() {
         usuario.setSalarioBase(BigDecimal.valueOf(20_000_000));
 

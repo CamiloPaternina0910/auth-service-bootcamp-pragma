@@ -15,13 +15,13 @@ public class UsuarioValidator {
 
     private final UsuarioRepository usuarioRepository;
 
-    public Mono<Usuario> validateUserForSave(Usuario usuario){
-        return validateCorreoElectronicoForSave(usuario)
-                .then(validateSalarioBase(usuario.getSalarioBase()))
+    public Mono<Usuario> validarCreacionUsuario(Usuario usuario){
+        return validarCorreoElectronicoCrearUsuario(usuario)
+                .then(validarSalarioBase(usuario.getSalarioBase()))
                 .thenReturn(usuario);
     }
 
-    private Mono<Void> validateCorreoElectronicoForSave(Usuario usuario) {
+    private Mono<Void> validarCorreoElectronicoCrearUsuario(Usuario usuario) {
         return usuarioRepository.findByCorreoElectronico(usuario.getCorreoElectronico())
                 .flatMap(existingUser -> Mono.error(
                         new CorreoElectronicoDuplicadoException(usuario.getCorreoElectronico())))
@@ -29,28 +29,28 @@ public class UsuarioValidator {
                 .then();
     }
 
-    private Mono<Void> validateSalarioBase(BigDecimal salarioBase) {
+    private Mono<Void> validarSalarioBase(BigDecimal salarioBase) {
         if (salarioBase == null || salarioBase.compareTo(BigDecimal.ZERO) < 0 || salarioBase.compareTo(BigDecimal.valueOf(15_000_000)) > 0) {
             return Mono.error(new SalarioInvalidoException());
         }
         return Mono.empty();
     }
 
-    public Mono<Usuario> validateUserForUpdate(Usuario usuario){
-        return validateUserExists(usuario.getId())
-                .flatMap(existingUser -> validateCorreoElectronicoForUpdate(usuario)
-                        .then(validateSalarioBase(usuario.getSalarioBase()))
+    public Mono<Usuario> validarEdicionUsuario(Usuario usuario){
+        return validarExistenciaUsuario(usuario.getId())
+                .flatMap(existingUser -> validarCorreoElectronicoEditarUsuario(usuario)
+                        .then(validarSalarioBase(usuario.getSalarioBase()))
                         .thenReturn(usuario)
                 );
     }
 
-    public Mono<Usuario> validateUserExists(String id) {
+    public Mono<Usuario> validarExistenciaUsuario(String id) {
         return usuarioRepository.findById(id)
                 .switchIfEmpty(Mono.error(new UsuarioNoEncontradoException(id)));
     }
 
 
-    private Mono<Void> validateCorreoElectronicoForUpdate(Usuario usuario) {
+    private Mono<Void> validarCorreoElectronicoEditarUsuario(Usuario usuario) {
         return usuarioRepository.findByCorreoElectronico(usuario.getCorreoElectronico())
                 .flatMap(existingUser -> {
                     if (!existingUser.getId().equals(usuario.getId())) {

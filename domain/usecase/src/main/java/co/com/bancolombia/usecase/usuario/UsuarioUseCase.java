@@ -14,7 +14,7 @@ public class UsuarioUseCase {
     private final UsuarioValidator usuarioValidator;
 
     public Mono<Usuario> save(Usuario usuario) {
-        return usuarioValidator.validateUserForSave(usuario)
+        return usuarioValidator.validarCreacionUsuario(usuario)
                 .then(usuarioRepository.save(usuario));
     }
 
@@ -23,16 +23,16 @@ public class UsuarioUseCase {
     }
 
     public Mono<Usuario> findById(String id) {
-        return usuarioValidator.validateUserExists(id);
+        return usuarioValidator.validarExistenciaUsuario(id);
     }
 
     public Mono<Usuario> update(Usuario usuario) {
-        return usuarioValidator.validateUserForUpdate(usuario)
+        return usuarioValidator.validarEdicionUsuario(usuario)
                         .then(usuarioRepository.update(usuario));
     }
 
     public Mono<Void> delete(String id) {
-        return usuarioValidator.validateUserExists(id)
+        return usuarioValidator.validarExistenciaUsuario(id)
                 .then(usuarioRepository.deleteById(id));
     }
 }

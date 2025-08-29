@@ -21,7 +21,7 @@ public class ReactiveValidator {
             return Mono.just(obj);
         } else {
             String errorMessage = violations.stream()
-                    .map(v -> v.getPropertyPath() + ": " + v.getMessage())
+                    .map(ConstraintViolation::getMessage)
                     .collect(Collectors.joining(", "));
             return Mono.error(new IllegalArgumentException(errorMessage));
         }

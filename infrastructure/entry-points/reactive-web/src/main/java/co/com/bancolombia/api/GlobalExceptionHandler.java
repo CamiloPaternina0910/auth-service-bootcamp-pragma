@@ -2,6 +2,7 @@ package co.com.bancolombia.api;
 
 
 import co.com.bancolombia.usecase.usuario.exception.DominioException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -13,6 +14,7 @@ import reactor.core.publisher.Mono;
 import java.nio.charset.StandardCharsets;
 
 @Component
+@Slf4j
 @Order(-2)
 public class GlobalExceptionHandler implements WebExceptionHandler {
 
@@ -28,15 +30,11 @@ public class GlobalExceptionHandler implements WebExceptionHandler {
             status = HttpStatus.valueOf(dominioException.getEstado());
         } else {
             status = HttpStatus.INTERNAL_SERVER_ERROR;
-            message = "Unexpected error: " + message;
+            log.error("Error inesperado" + message);
+            message = "Algo salió mal, comuniquese con el equipo de soporte.";
         }
 
-        String body = String.format(
-                "{ \"status\": %d, \"error\": \"%s\", \"message\": \"%s\" }",
-                status.value(),
-                status.getReasonPhrase(),
-                message
-        );
+        String body = String.format("{\"message\": \"%s\" }", message);
 
         byte[] bytes = body.getBytes(StandardCharsets.UTF_8);
 

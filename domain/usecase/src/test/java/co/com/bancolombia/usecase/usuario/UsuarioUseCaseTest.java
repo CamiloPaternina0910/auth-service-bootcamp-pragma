@@ -22,17 +22,16 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class UsuarioUseCaseTest {
+class UsuarioUseCaseTest {
 
     private UsuarioRepository repository;
-    private UsuarioValidator validator;
     private UsuarioUseCase useCase;
     private Usuario usuario;
 
     @BeforeEach
      void setUp() {
         repository = Mockito.mock(UsuarioRepository.class);
-        validator = new UsuarioValidator(repository);
+        UsuarioValidator validator = new UsuarioValidator(repository);
         useCase = new UsuarioUseCase(repository, validator);
 
         usuario = new Usuario();

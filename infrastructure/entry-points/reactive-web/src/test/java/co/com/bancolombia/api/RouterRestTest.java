@@ -104,11 +104,11 @@ class RouterRestTest {
 
         webTestClient.get()
                 .uri("/api/v1/usuarios")
-                .accept(MediaType.TEXT_EVENT_STREAM)
+                .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$.correoElectronico").isEqualTo("camilo@example.com");
+                .jsonPath("$[0].correoElectronico").isEqualTo("camilo@example.com");
 
 
     }

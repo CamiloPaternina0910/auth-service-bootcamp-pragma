@@ -28,13 +28,16 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.r
 @RequiredArgsConstructor
 public class RouterRest {
 
+    private final String PATH_USUARIO = "/api/v1/usuarios";
+    private final String PATH_USUARIO_ID = "/api/v1/usuarios/{id}";
+
     private final Handler usuarioHandler;
 
     @Bean
     @RouterOperations({
             // Crear usuario
             @RouterOperation(
-                    path = "/api/v1/usuarios",
+                    path = PATH_USUARIO,
                     method = RequestMethod.POST,
                     beanClass = Handler.class,
                     beanMethod = "listenSaveUser",
@@ -74,7 +77,7 @@ public class RouterRest {
             ),
             // Listar usuarios
             @RouterOperation(
-                    path = "/api/v1/usuarios",
+                    path = PATH_USUARIO,
                     method = RequestMethod.GET,
                     beanClass = Handler.class,
                     beanMethod = "listenFindAllUser",
@@ -93,7 +96,7 @@ public class RouterRest {
             ),
             // Buscar por ID
             @RouterOperation(
-                    path = "/api/v1/usuarios/{id}",
+                    path = PATH_USUARIO_ID,
                     method = RequestMethod.GET,
                     beanClass = Handler.class,
                     beanMethod = "listenFindUserById",
@@ -114,15 +117,14 @@ public class RouterRest {
             ),
             // Editar usuario
             @RouterOperation(
-                    path = "/api/v1/usuarios/{id}",
+                    path = PATH_USUARIO,
                     method = RequestMethod.PUT,
                     beanClass = Handler.class,
                     beanMethod = "listenUpdateUser",
                     operation = @Operation(
                             operationId = "updateUsuario",
-                            summary = "Actualizar usuario por id",
+                            summary = "Actualizar usuario",
                             tags = {"Usuarios"},
-                            parameters = @Parameter(name = "id", in = ParameterIn.PATH, required = true, example = "64f123abc"),
                             requestBody = @RequestBody(
                                     required = true,
                                     description = "Datos del usuario a editar",
@@ -155,7 +157,7 @@ public class RouterRest {
             ),
             // Eliminar usuario
             @RouterOperation(
-                    path = "/api/v1/usuarios/{id}",
+                    path = PATH_USUARIO_ID,
                     method = RequestMethod.DELETE,
                     beanClass = Handler.class,
                     beanMethod = "listenDeleteUserById",
@@ -172,11 +174,11 @@ public class RouterRest {
             )
     })
     public RouterFunction<ServerResponse> usuarioRoutes(Handler handler) {
-        return route(POST("/api/v1/usuarios"), usuarioHandler::listenSaveUser)
-                .andRoute(GET("/api/v1/usuarios"), usuarioHandler::listenFindAllUser)
-                .andRoute(GET("/api/v1/usuarios/{id}"), usuarioHandler::listenFindUserById)
-                .andRoute(PUT("/api/v1/usuarios/{id}"), usuarioHandler::listenUpdateUser)
-                .andRoute(DELETE("/api/v1/usuarios/{id}"), usuarioHandler::listenDeleteUserById);
+        return route(POST(PATH_USUARIO), usuarioHandler::listenSaveUser)
+                .andRoute(GET(PATH_USUARIO), usuarioHandler::listenFindAllUser)
+                .andRoute(GET(PATH_USUARIO_ID), usuarioHandler::listenFindUserById)
+                .andRoute(PUT(PATH_USUARIO), usuarioHandler::listenUpdateUser)
+                .andRoute(DELETE(PATH_USUARIO_ID), usuarioHandler::listenDeleteUserById);
     }
 
 }

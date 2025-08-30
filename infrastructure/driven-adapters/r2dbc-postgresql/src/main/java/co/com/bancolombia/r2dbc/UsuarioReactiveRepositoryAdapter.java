@@ -38,6 +38,11 @@ public class UsuarioReactiveRepositoryAdapter extends ReactiveAdapterOperations<
     }
 
     @Override
+    public Mono<Usuario> findByDocumentoIdentificacion(String documentoIdentificacion) {
+        return this.repository.findByDocumentoIdentificacion(documentoIdentificacion);
+    }
+
+    @Override
     @Transactional
     public Mono<Usuario> update(Usuario usuario) {
         return super.save(usuario)

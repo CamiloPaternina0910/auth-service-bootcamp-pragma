@@ -4,6 +4,7 @@ import co.com.bancolombia.model.usuario.Usuario;
 import co.com.bancolombia.model.usuario.gateways.UsuarioRepository;
 import co.com.bancolombia.usecase.usuario.exception.CorreoElectronicoDuplicadoException;
 import co.com.bancolombia.usecase.usuario.exception.SalarioInvalidoException;
+import co.com.bancolombia.usecase.usuario.exception.UsuarioDocumentoIdentidadNoEncontrado;
 import co.com.bancolombia.usecase.usuario.exception.UsuarioNoEncontradoException;
 import co.com.bancolombia.usecase.usuario.validator.UsuarioValidator;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,6 +39,7 @@ class UsuarioUseCaseTest {
         usuario.setId("1");
         usuario.setNombres("Camilo");
         usuario.setApellidos("Paternina");
+        usuario.setDocumentoIdentificacion("1003717195");
         usuario.setCorreoElectronico("camilo@example.com");
         usuario.setFechaNacimiento(LocalDate.of(1995, 8, 15));
         usuario.setSalarioBase(BigDecimal.valueOf(3500000));
@@ -111,6 +113,25 @@ class UsuarioUseCaseTest {
                 .expectError(UsuarioNoEncontradoException.class)
                 .verify();
     }
+
+    @Test
+    void findByDocumentoIdentificacion_success() {
+        when(repository.findByDocumentoIdentificacion("1003717195")).thenReturn(Mono.just(usuario));
+
+        StepVerifier.create(useCase.findByDocumentoIdentificacion("1003717195"))
+                .expectNext(usuario)
+                .verifyComplete();
+    }
+
+    @Test
+    void findByDocumentoIdentificacion_notFound() {
+        when(repository.findByDocumentoIdentificacion("1003717195")).thenReturn(Mono.empty());
+
+        StepVerifier.create(useCase.findByDocumentoIdentificacion("1003717195"))
+                .expectError(UsuarioDocumentoIdentidadNoEncontrado.class)
+                .verify();
+    }
+
 
     @Test
     void updateUsuario_success() {

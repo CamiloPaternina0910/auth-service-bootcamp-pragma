@@ -4,6 +4,7 @@ import co.com.bancolombia.model.usuario.Usuario;
 import co.com.bancolombia.model.usuario.gateways.UsuarioRepository;
 import co.com.bancolombia.usecase.usuario.exception.CorreoElectronicoDuplicadoException;
 import co.com.bancolombia.usecase.usuario.exception.SalarioInvalidoException;
+import co.com.bancolombia.usecase.usuario.exception.UsuarioDocumentoIdentidadNoEncontrado;
 import co.com.bancolombia.usecase.usuario.exception.UsuarioNoEncontradoException;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
@@ -37,18 +38,22 @@ public class UsuarioValidator {
     }
 
     public Mono<Usuario> validarEdicionUsuario(Usuario usuario){
-        return validarExistenciaUsuario(usuario.getId())
+        return existeUsuarioPorId(usuario.getId())
                 .flatMap(existingUser -> validarCorreoElectronicoEditarUsuario(usuario)
                         .then(validarSalarioBase(usuario.getSalarioBase()))
                         .thenReturn(usuario)
                 );
     }
 
-    public Mono<Usuario> validarExistenciaUsuario(String id) {
+    public Mono<Usuario> existeUsuarioPorId(String id) {
         return usuarioRepository.findById(id)
                 .switchIfEmpty(Mono.error(new UsuarioNoEncontradoException(id)));
     }
 
+    public Mono<Usuario> existeUsuarioPorDocumentoIdentificacion(String documentoIdentificacion) {
+        return usuarioRepository.findByDocumentoIdentificacion(documentoIdentificacion)
+                .switchIfEmpty(Mono.error(new UsuarioDocumentoIdentidadNoEncontrado(documentoIdentificacion)));
+    }
 
     private Mono<Void> validarCorreoElectronicoEditarUsuario(Usuario usuario) {
         return usuarioRepository.findByCorreoElectronico(usuario.getCorreoElectronico())

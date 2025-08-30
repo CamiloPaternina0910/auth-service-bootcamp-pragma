@@ -37,6 +37,7 @@ class UsuarioReactiveRepositoryAdapterTest {
                 "Camilo",
                 "Paternina",
                 "camilo@example.com",
+                "1003717195",
                 null, "Calle 123",
                 "3001234567",
                 null
@@ -46,6 +47,7 @@ class UsuarioReactiveRepositoryAdapterTest {
                 "Camilo",
                 "Paternina",
                 "camilo@example.com",
+                "1003717195",
                 null, "Calle 123",
                 "3001234567",
                 null
@@ -139,6 +141,28 @@ class UsuarioReactiveRepositoryAdapterTest {
         when(repository.findByCorreoElectronico("notfound@example.com")).thenReturn(Mono.empty());
 
         Mono<Usuario> result = repositoryAdapter.findByCorreoElectronico("notfound@example.com");
+
+        StepVerifier.create(result)
+                .verifyComplete();
+    }
+
+    @Test
+    void findByDocumentoIdentificacion_whenUsuarioExists_shouldReturnUsuario() {
+        when(repository.findByDocumentoIdentificacion("1003717195"))
+                .thenReturn(Mono.just(usuario));
+
+        Mono<Usuario> result = repositoryAdapter.findByDocumentoIdentificacion("1003717195");
+
+        StepVerifier.create(result)
+                .expectNext(usuario)
+                .verifyComplete();
+    }
+
+    @Test
+    void findByDocumentoIdentificacion_whenNotFound_shouldReturnEmpty() {
+        when(repository.findByDocumentoIdentificacion("33433444433")).thenReturn(Mono.empty());
+
+        Mono<Usuario> result = repositoryAdapter.findByDocumentoIdentificacion("33433444433");
 
         StepVerifier.create(result)
                 .verifyComplete();

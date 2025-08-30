@@ -56,6 +56,16 @@ public class Handler {
                 .switchIfEmpty(ServerResponse.notFound().build());
     }
 
+    public Mono<ServerResponse> listenFindUserByDocumentoIdentificacion(ServerRequest serverRequest) {
+        String id =serverRequest.pathVariable("documentoIdentificacion");
+
+        return usuarioUseCase.findByDocumentoIdentificacion(id)
+                .flatMap(user -> ServerResponse.ok()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .bodyValue(user))
+                .switchIfEmpty(ServerResponse.notFound().build());
+    }
+
     public Mono<ServerResponse> listenDeleteUserById(ServerRequest serverRequest){
         String id =serverRequest.pathVariable("id");
 

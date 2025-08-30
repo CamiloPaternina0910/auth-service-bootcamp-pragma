@@ -24,6 +24,10 @@ public class CrearUsuarioDto {
     @Schema(description = "Correo electrónico", example = "camilo.paternina@example.com")
     private String correoElectronico;
 
+    @NotBlank(message = "El documento de identificación es obligatorio")
+    @Schema(description = "Documento de identificación del usuario", example = "10031232527")
+    private String documentoIdentificacion;
+
     @Schema(description = "Fecha de nacimiento", example = "1995-08-15")
     private LocalDate fechaNacimiento;
 

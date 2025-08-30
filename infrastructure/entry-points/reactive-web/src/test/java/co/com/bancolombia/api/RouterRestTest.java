@@ -46,6 +46,7 @@ class RouterRestTest {
                 "Camilo",
                 "Paternina",
                 "camilo@example.com",
+                "1003717195",
                 LocalDate.of(1995, 5, 20),
                 "Calle 123",
                 "3001234567",
@@ -136,6 +137,33 @@ class RouterRestTest {
 
         webTestClient.get()
                 .uri("/api/v1/usuarios/2")
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    void testFindUserByDocumentoIdentificacion_found() {
+        Usuario usuario = buildUsuario();
+
+        when(usuarioUseCase.findByDocumentoIdentificacion("1003717195")).thenReturn(Mono.just(usuario));
+
+        webTestClient.get()
+                .uri("/api/v1/usuarios/documentoIdentificacion/1003717195")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.id").isEqualTo("1")
+                .jsonPath("$.nombres").isEqualTo("Camilo")
+                .jsonPath("$.apellidos").isEqualTo("Paternina");
+    }
+
+    @Test
+    void testFindUserByDocumentoIdentificacion_notFound() {
+        when(usuarioUseCase.findByDocumentoIdentificacion("234534535")).thenReturn(Mono.empty());
+
+        webTestClient.get()
+                .uri("/api/v1/usuarios/documentoIdentificacion/234534535")
                 .exchange()
                 .expectStatus().isNotFound();
     }

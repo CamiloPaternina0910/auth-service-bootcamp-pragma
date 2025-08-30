@@ -30,6 +30,8 @@ public class UsuarioEntity {
 
     private String correoElectronico;
 
+    private String documentoIdentificacion;
+
     private LocalDate fechaNacimiento;
 
     private String direccion;

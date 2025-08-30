@@ -30,6 +30,7 @@ public class RouterRest {
 
     private final String PATH_USUARIO = "/api/v1/usuarios";
     private final String PATH_USUARIO_ID = "/api/v1/usuarios/{id}";
+    private final String PATH_USUARIO_DOCUMENTO = "/api/v1/usuarios/documentoIdentificacion/{documentoIdentificacion}";
 
     private final Handler usuarioHandler;
 
@@ -115,6 +116,27 @@ public class RouterRest {
                             }
                     )
             ),
+            // Buscar por DocumentoIdentificacion
+            @RouterOperation(
+                    path = PATH_USUARIO_DOCUMENTO,
+                    method = RequestMethod.GET,
+                    beanClass = Handler.class,
+                    beanMethod = "listenFindUserByDocumentoIdentificacion",
+                    operation = @Operation(
+                            operationId = "findUsuarioByDocumentoIdentificacion",
+                            summary = "Buscar usuario por documento identificación",
+                            tags = {"Usuarios"},
+                            parameters = @Parameter(name = "documentoIdentificacion", in = ParameterIn.PATH, required = true, example = "64f123abc"),
+                            responses = {
+                                    @ApiResponse(
+                                            responseCode = "200",
+                                            description = "Usuario encontrado",
+                                            content = @Content(schema = @Schema(implementation = LecturaUsuarioDto.class))
+                                    ),
+                                    @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
+                            }
+                    )
+            ),
             // Editar usuario
             @RouterOperation(
                     path = PATH_USUARIO,
@@ -177,6 +199,7 @@ public class RouterRest {
         return route(POST(PATH_USUARIO), usuarioHandler::listenSaveUser)
                 .andRoute(GET(PATH_USUARIO), usuarioHandler::listenFindAllUser)
                 .andRoute(GET(PATH_USUARIO_ID), usuarioHandler::listenFindUserById)
+                .andRoute(GET(PATH_USUARIO_DOCUMENTO), usuarioHandler::listenFindUserByDocumentoIdentificacion)
                 .andRoute(PUT(PATH_USUARIO), usuarioHandler::listenUpdateUser)
                 .andRoute(DELETE(PATH_USUARIO_ID), usuarioHandler::listenDeleteUserById);
     }

@@ -23,7 +23,11 @@ public class UsuarioUseCase {
     }
 
     public Mono<Usuario> findById(String id) {
-        return usuarioValidator.validarExistenciaUsuario(id);
+        return usuarioValidator.existeUsuarioPorId(id);
+    }
+
+    public Mono<Usuario> findByDocumentoIdentificacion(String documentoIdentificacion) {
+        return usuarioValidator.existeUsuarioPorDocumentoIdentificacion(documentoIdentificacion);
     }
 
     public Mono<Usuario> update(Usuario usuario) {
@@ -32,7 +36,7 @@ public class UsuarioUseCase {
     }
 
     public Mono<Void> delete(String id) {
-        return usuarioValidator.validarExistenciaUsuario(id)
+        return usuarioValidator.existeUsuarioPorId(id)
                 .then(usuarioRepository.deleteById(id));
     }
 }

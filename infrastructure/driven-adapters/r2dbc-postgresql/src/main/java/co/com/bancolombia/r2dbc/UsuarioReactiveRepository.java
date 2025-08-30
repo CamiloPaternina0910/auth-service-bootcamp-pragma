@@ -10,4 +10,5 @@ import java.math.BigInteger;
 
 public interface UsuarioReactiveRepository extends ReactiveCrudRepository<UsuarioEntity, String>, ReactiveQueryByExampleExecutor<UsuarioEntity> {
     Mono<Usuario> findByCorreoElectronico(String correoElectronico);
+    Mono<Usuario> findByDocumentoIdentificacion(String documentoIdentificacion);
 }

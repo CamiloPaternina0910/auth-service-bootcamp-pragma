@@ -1,12 +1,10 @@
 package co.com.bancolombia.api.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.time.LocalDate;
 
 @Getter
@@ -22,6 +20,9 @@ public class LecturaUsuarioDto {
 
     @Schema(description = "Correo electrónico", example = "camilo.paternina@example.com")
     private String correoElectronico;
+
+    @Schema(description = "Documento de identificación del usuario", example = "10031232527")
+    private String documentoIdentificacion;
 
     @Schema(description = "Fecha de nacimiento", example = "1995-08-15")
     private LocalDate fechaNacimiento;

@@ -3,8 +3,8 @@ package co.com.bancolombia.api;
 import co.com.bancolombia.api.dto.CrearUsuarioDto;
 import co.com.bancolombia.api.dto.EditarUsuarioDto;
 import co.com.bancolombia.api.mapper.UsuarioMapper;
-import co.com.bancolombia.model.user.Usuario;
-import co.com.bancolombia.usecase.user.UsuarioUseCase;
+import co.com.bancolombia.model.usuario.Usuario;
+import co.com.bancolombia.usecase.usuario.UsuarioUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -24,7 +24,7 @@ public class Handler {
         return serverRequest.bodyToMono(CrearUsuarioDto.class)
                 .flatMap(reactiveValidator::validate)
                 .map(usuarioMapper::toModel)
-                .map(usuarioUseCase::save)
+                .flatMap(usuarioUseCase::save)
                 .flatMap(savedUser -> ServerResponse.ok()
                         .contentType(MediaType.APPLICATION_JSON)
                         .bodyValue(savedUser));
@@ -42,12 +42,12 @@ public class Handler {
 
     public Mono<ServerResponse> listenFindAllUser(ServerRequest serverRequest) {
         return ServerResponse.ok()
-                .contentType(MediaType.TEXT_EVENT_STREAM)
+                .contentType(MediaType.APPLICATION_JSON)
                 .body(usuarioUseCase.findAll(), Usuario.class);
     }
 
     public Mono<ServerResponse> listenFindUserById(ServerRequest serverRequest) {
-        String id = serverRequest.pathVariable("id");
+        String id =serverRequest.pathVariable("id");
 
         return usuarioUseCase.findById(id)
                 .flatMap(user -> ServerResponse.ok()
@@ -57,7 +57,7 @@ public class Handler {
     }
 
     public Mono<ServerResponse> listenDeleteUserById(ServerRequest serverRequest){
-        String id = serverRequest.pathVariable("id");
+        String id =serverRequest.pathVariable("id");
 
         return usuarioUseCase.delete(id)
                 .then(ServerResponse.noContent().build());

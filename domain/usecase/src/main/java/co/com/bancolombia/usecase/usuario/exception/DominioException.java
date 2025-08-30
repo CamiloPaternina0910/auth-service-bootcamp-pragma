@@ -1,4 +1,4 @@
-package co.com.bancolombia.usecase.exception;
+package co.com.bancolombia.usecase.usuario.exception;
 
 import lombok.Getter;
 

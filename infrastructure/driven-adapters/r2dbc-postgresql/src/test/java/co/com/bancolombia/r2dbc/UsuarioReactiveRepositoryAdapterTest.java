@@ -1,78 +1,146 @@
 package co.com.bancolombia.r2dbc;
 
+import co.com.bancolombia.model.usuario.Usuario;
+import co.com.bancolombia.r2dbc.entity.UsuarioEntity;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.reactivecommons.utils.ObjectMapper;
-import org.springframework.data.domain.Example;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class UsuarioReactiveRepositoryAdapterTest {
-    // TODO: change four you own tests
-/*
+
     @InjectMocks
-    UserReactiveRepositoryAdapter repositoryAdapter;
+    UsuarioReactiveRepositoryAdapter repositoryAdapter;
 
     @Mock
-    UserReactiveRepository repository;
+    UsuarioReactiveRepository repository;
 
     @Mock
     ObjectMapper mapper;
 
+    private UsuarioEntity usuarioEntity;
+    private Usuario usuario;
+
+    @BeforeEach
+    void setUp(){
+        usuarioEntity = new UsuarioEntity(
+                "1",
+                "Camilo",
+                "Paternina",
+                "camilo@example.com",
+                null, "Calle 123",
+                "3001234567",
+                null
+        );
+        usuario = new Usuario(
+                "1",
+                "Camilo",
+                "Paternina",
+                "camilo@example.com",
+                null, "Calle 123",
+                "3001234567",
+                null
+        );
+    }
+
     @Test
-    void mustFindValueById() {
+    void findById_whenUsuarioExists_shouldReturnUsuario() {
+        when(repository.findById("1")).thenReturn(Mono.just(usuarioEntity));
+        when(mapper.map(usuarioEntity, Usuario.class)).thenReturn(usuario);
 
-        when(repository.findById("1")).thenReturn(Mono.just("test"));
-        when(mapper.map("test", Object.class)).thenReturn("test");
-
-        Mono<Object> result = repositoryAdapter.findById("1");
+        Mono<Usuario> result = repositoryAdapter.findById("1");
 
         StepVerifier.create(result)
-                .expectNextMatches(value -> value.equals("test"))
+                .expectNext(usuario)
                 .verifyComplete();
     }
 
     @Test
-    void mustFindAllValues() {
-        when(repository.findAll()).thenReturn(Flux.just("test"));
-        when(mapper.map("test", Object.class)).thenReturn("test");
+    void findById_whenUsuarioNotFound_shouldReturnEmpty() {
+        when(repository.findById("2")).thenReturn(Mono.empty());
 
-        Flux<Object> result = repositoryAdapter.findAll();
+        Mono<Usuario> result = repositoryAdapter.findById("2");
 
         StepVerifier.create(result)
-                .expectNextMatches(value -> value.equals("test"))
                 .verifyComplete();
     }
 
     @Test
-    void mustFindByExample() {
-        when(repository.findAll(any(Example.class))).thenReturn(Flux.just("test"));
-        when(mapper.map("test", Object.class)).thenReturn("test");
+    void findAll_shouldReturnUsuarios() {
+        when(repository.findAll()).thenReturn(Flux.just(usuarioEntity));
+        when(mapper.map(usuarioEntity, Usuario.class)).thenReturn(usuario);
 
-        Flux<Object> result = repositoryAdapter.findByExample("test");
+        Flux<Usuario> result = repositoryAdapter.findAll();
 
         StepVerifier.create(result)
-                .expectNextMatches(value -> value.equals("test"))
+                .expectNext(usuario)
                 .verifyComplete();
     }
 
     @Test
-    void mustSaveValue() {
-        when(repository.save("test")).thenReturn(Mono.just("test"));
-        when(mapper.map("test", Object.class)).thenReturn("test");
+    void saveUsuario_shouldReturnSavedUsuario() {
+        when(repository.save(usuarioEntity)).thenReturn(Mono.just(usuarioEntity));
+        when(mapper.map(usuario, UsuarioEntity.class)).thenReturn(usuarioEntity);
+        when(mapper.map(usuarioEntity, Usuario.class)).thenReturn(usuario);
 
-        Mono<Object> result = repositoryAdapter.save("test");
+        Mono<Usuario> result = repositoryAdapter.save(usuario);
 
         StepVerifier.create(result)
-                .expectNextMatches(value -> value.equals("test"))
+                .expectNext(usuario)
                 .verifyComplete();
-    }*/
+    }
+
+    @Test
+    void updateUsuario_shouldReturnUpdatedUsuario() {
+        when(repository.save(usuarioEntity)).thenReturn(Mono.just(usuarioEntity));
+        when(mapper.map(usuario, UsuarioEntity.class)).thenReturn(usuarioEntity);
+        when(mapper.map(usuarioEntity, Usuario.class)).thenReturn(usuario);
+
+        Mono<Usuario> result = repositoryAdapter.update(usuario);
+
+        StepVerifier.create(result)
+                .expectNext(usuario)
+                .verifyComplete();
+    }
+
+    @Test
+    void deleteUsuarioById_shouldCompleteSuccessfully() {
+        when(repository.deleteById("1")).thenReturn(Mono.empty());
+
+        Mono<Void> result = repositoryAdapter.deleteById("1");
+
+        StepVerifier.create(result)
+                .verifyComplete();
+    }
+
+    @Test
+    void findByCorreoElectronico_whenUsuarioExists_shouldReturnUsuario() {
+        when(repository.findByCorreoElectronico("camilo@example.com"))
+                .thenReturn(Mono.just(usuario));
+
+        Mono<Usuario> result = repositoryAdapter.findByCorreoElectronico("camilo@example.com");
+
+        StepVerifier.create(result)
+                .expectNext(usuario)
+                .verifyComplete();
+    }
+
+    @Test
+    void findByCorreoElectronico_whenNotFound_shouldReturnEmpty() {
+        when(repository.findByCorreoElectronico("notfound@example.com")).thenReturn(Mono.empty());
+
+        Mono<Usuario> result = repositoryAdapter.findByCorreoElectronico("notfound@example.com");
+
+        StepVerifier.create(result)
+                .verifyComplete();
+    }
 }

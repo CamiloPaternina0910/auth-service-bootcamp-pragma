@@ -51,8 +51,8 @@ public abstract class ReactiveAdapterOperations<E, D, I, R extends ReactiveCrudR
         return repository.saveAll(data);
     }
 
-    public Mono<E> findByCorreoElectronico(I correoElectronico) {
-        return repository.findById(correoElectronico).map(this::toEntity);
+    public Mono<E> findById(I id) {
+        return repository.findById(id).map(this::toEntity);
     }
 
     public Flux<E> findByExample(E entity) {

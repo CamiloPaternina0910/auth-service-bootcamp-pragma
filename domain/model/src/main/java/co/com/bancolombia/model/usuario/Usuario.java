@@ -1,18 +1,21 @@
-package co.com.bancolombia.model.user;
+package co.com.bancolombia.model.usuario;
 
-import lombok.Builder;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.LocalDate;
 
 @Getter
 @Setter
 @AllArgsConstructor
-@Builder(toBuilder = true)
+@NoArgsConstructor
 public class Usuario {
+
+    private String id;
 
     private String nombres;
 

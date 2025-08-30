@@ -30,7 +30,6 @@ public class GlobalExceptionHandler implements WebExceptionHandler {
             status = HttpStatus.valueOf(dominioException.getEstado());
         } else {
             status = HttpStatus.INTERNAL_SERVER_ERROR;
-            log.error("Error inesperado" + message);
             message = "Algo salió mal, comuniquese con el equipo de soporte.";
         }
 

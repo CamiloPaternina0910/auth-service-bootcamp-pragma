@@ -1,11 +1,10 @@
 package co.com.bancolombia.usecase.usuario.validator;
 
+import co.com.bancolombia.model.rol.Rol;
+import co.com.bancolombia.model.rol.gateways.RolRepository;
 import co.com.bancolombia.model.usuario.Usuario;
 import co.com.bancolombia.model.usuario.gateways.UsuarioRepository;
-import co.com.bancolombia.usecase.usuario.exception.CorreoElectronicoDuplicadoException;
-import co.com.bancolombia.usecase.usuario.exception.SalarioInvalidoException;
-import co.com.bancolombia.usecase.usuario.exception.UsuarioDocumentoIdentidadNoEncontrado;
-import co.com.bancolombia.usecase.usuario.exception.UsuarioNoEncontradoException;
+import co.com.bancolombia.usecase.usuario.exception.*;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
@@ -15,11 +14,18 @@ import java.math.BigDecimal;
 public class UsuarioValidator {
 
     private final UsuarioRepository usuarioRepository;
+    private final RolRepository rolRepository;
+
+    private final String NOMBRE_ROL_CLIENTE = "CLIENTE";
 
     public Mono<Usuario> validarCreacionUsuario(Usuario usuario){
         return validarCorreoElectronicoCrearUsuario(usuario)
                 .then(validarSalarioBase(usuario.getSalarioBase()))
-                .thenReturn(usuario);
+                .then(existeRolPorNombre(NOMBRE_ROL_CLIENTE))
+                .map(rol -> {
+                    usuario.setIdRol(rol.getId());
+                    return usuario;
+                });
     }
 
     private Mono<Void> validarCorreoElectronicoCrearUsuario(Usuario usuario) {
@@ -37,12 +43,23 @@ public class UsuarioValidator {
         return Mono.empty();
     }
 
+    private Mono<Rol> existeRolPorNombre(String nombre){
+        return rolRepository.findByNombre(nombre)
+                .switchIfEmpty(Mono.error(new RolPorNombreNoEncontradoException(nombre)));
+    }
+
     public Mono<Usuario> validarEdicionUsuario(Usuario usuario){
         return existeUsuarioPorId(usuario.getId())
-                .flatMap(existingUser -> validarCorreoElectronicoEditarUsuario(usuario)
-                        .then(validarSalarioBase(usuario.getSalarioBase()))
-                        .thenReturn(usuario)
-                );
+                .flatMap(existingUser ->
+                        Mono.when(
+                                validarCorreoElectronicoEditarUsuario(usuario),
+                                validarSalarioBase(usuario.getSalarioBase())
+                        ).then(Mono.just(existingUser))
+                )
+                .map(existingUser -> {
+                    usuario.setIdRol(existingUser.getIdRol());
+                    return usuario;
+                });
     }
 
     public Mono<Usuario> existeUsuarioPorId(String id) {
@@ -66,5 +83,4 @@ public class UsuarioValidator {
                 .switchIfEmpty(Mono.empty())
                 .then();
     }
-
 }

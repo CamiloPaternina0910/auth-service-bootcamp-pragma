@@ -1,11 +1,10 @@
 package co.com.bancolombia.usecase.usuario;
 
+import co.com.bancolombia.model.rol.Rol;
+import co.com.bancolombia.model.rol.gateways.RolRepository;
 import co.com.bancolombia.model.usuario.Usuario;
 import co.com.bancolombia.model.usuario.gateways.UsuarioRepository;
-import co.com.bancolombia.usecase.usuario.exception.CorreoElectronicoDuplicadoException;
-import co.com.bancolombia.usecase.usuario.exception.SalarioInvalidoException;
-import co.com.bancolombia.usecase.usuario.exception.UsuarioDocumentoIdentidadNoEncontrado;
-import co.com.bancolombia.usecase.usuario.exception.UsuarioNoEncontradoException;
+import co.com.bancolombia.usecase.usuario.exception.*;
 import co.com.bancolombia.usecase.usuario.validator.UsuarioValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,6 +17,7 @@ import reactor.test.StepVerifier;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -26,13 +26,18 @@ import static org.mockito.Mockito.*;
 class UsuarioUseCaseTest {
 
     private UsuarioRepository repository;
+    private RolRepository rolRepository;
     private UsuarioUseCase useCase;
     private Usuario usuario;
+    private Rol rol;
+
+    private final String NOMBRE_ROL_CLIENTE = "CLIENTE";
 
     @BeforeEach
      void setUp() {
         repository = Mockito.mock(UsuarioRepository.class);
-        UsuarioValidator validator = new UsuarioValidator(repository);
+        rolRepository = Mockito.mock(RolRepository.class);
+        UsuarioValidator validator = new UsuarioValidator(repository, rolRepository);
         useCase = new UsuarioUseCase(repository, validator);
 
         usuario = new Usuario();
@@ -43,10 +48,13 @@ class UsuarioUseCaseTest {
         usuario.setCorreoElectronico("camilo@example.com");
         usuario.setFechaNacimiento(LocalDate.of(1995, 8, 15));
         usuario.setSalarioBase(BigDecimal.valueOf(3500000));
+
+        rol = Rol.builder().id(UUID.randomUUID().toString()).nombre(NOMBRE_ROL_CLIENTE).build();
     }
 
     @Test
     void saveUsuario_success() {
+        when(rolRepository.findByNombre(NOMBRE_ROL_CLIENTE)).thenReturn(Mono.just(rol));
         when(repository.findByCorreoElectronico("camilo@example.com"))
                 .thenReturn(Mono.empty());
         when(repository.save(any(Usuario.class)))
@@ -60,7 +68,21 @@ class UsuarioUseCaseTest {
     }
 
     @Test
+    void saveUsuario_rolNotFound() {
+        when(rolRepository.findByNombre(NOMBRE_ROL_CLIENTE)).thenReturn(Mono.empty());
+        when(repository.findByCorreoElectronico("camilo@example.com"))
+                .thenReturn(Mono.empty());
+        when(repository.save(any(Usuario.class)))
+                .thenReturn(Mono.just(usuario));
+
+        StepVerifier.create(useCase.save(usuario))
+                .expectError(RolPorNombreNoEncontradoException.class)
+                .verify();
+    }
+
+    @Test
     void saveUsuario_correoDuplicado() {
+        when(rolRepository.findByNombre(NOMBRE_ROL_CLIENTE)).thenReturn(Mono.just(rol));
         when(repository.findByCorreoElectronico("camilo@example.com"))
                 .thenReturn(Mono.just(usuario));
         when(repository.save(usuario)).thenReturn(Mono.just(usuario));
@@ -76,6 +98,7 @@ class UsuarioUseCaseTest {
     void saveUsuario_salarioMenorQueCero() {
         usuario.setSalarioBase(BigDecimal.valueOf(-1000));
 
+        when(rolRepository.findByNombre(NOMBRE_ROL_CLIENTE)).thenReturn(Mono.just(rol));
         when(repository.findByCorreoElectronico(usuario.getCorreoElectronico())).thenReturn(Mono.empty());
         when(repository.save(usuario)).thenReturn(Mono.just(usuario));
 
@@ -88,6 +111,7 @@ class UsuarioUseCaseTest {
     void saveUsuario_salarioMayorQueMaximo() {
         usuario.setSalarioBase(BigDecimal.valueOf(20_000_000));
 
+        when(rolRepository.findByNombre(NOMBRE_ROL_CLIENTE)).thenReturn(Mono.just(rol));
         when(repository.findByCorreoElectronico(usuario.getCorreoElectronico())).thenReturn(Mono.empty());
         when(repository.save(usuario)).thenReturn(Mono.just(usuario));
 

@@ -1,10 +1,7 @@
-package co.com.bancolombia.r2dbc.entity;
+package co.com.bancolombia.r2dbc.usuario.entity;
 
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
-import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 import lombok.Getter;
@@ -12,7 +9,6 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.UUID;
 
 @Table("usuarios")
 @Getter
@@ -39,4 +35,6 @@ public class UsuarioEntity {
     private String telefono;
 
     private BigDecimal salarioBase;
+
+    private String idRol;
 }

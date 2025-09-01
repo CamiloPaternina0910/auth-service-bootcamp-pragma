@@ -1,8 +1,8 @@
-package co.com.bancolombia.r2dbc;
+package co.com.bancolombia.r2dbc.usuario;
 
 import co.com.bancolombia.model.usuario.Usuario;
 import co.com.bancolombia.model.usuario.gateways.UsuarioRepository;
-import co.com.bancolombia.r2dbc.entity.UsuarioEntity;
+import co.com.bancolombia.r2dbc.usuario.entity.UsuarioEntity;
 import co.com.bancolombia.r2dbc.helper.ReactiveAdapterOperations;
 import lombok.extern.slf4j.Slf4j;
 import org.reactivecommons.utils.ObjectMapper;

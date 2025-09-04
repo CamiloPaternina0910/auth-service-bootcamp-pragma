@@ -1,10 +1,12 @@
 package co.com.bancolombia.usecase.usuario.validator;
 
+import co.com.bancolombia.model.jwt.gateways.JwtHelper;
+import co.com.bancolombia.model.jwt.gateways.JwtService;
 import co.com.bancolombia.model.rol.Rol;
 import co.com.bancolombia.model.rol.gateways.RolRepository;
 import co.com.bancolombia.model.usuario.Usuario;
+import co.com.bancolombia.model.usuario.exception.*;
 import co.com.bancolombia.model.usuario.gateways.UsuarioRepository;
-import co.com.bancolombia.usecase.usuario.exception.*;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
@@ -15,17 +17,23 @@ public class UsuarioValidator {
 
     private final UsuarioRepository usuarioRepository;
     private final RolRepository rolRepository;
+    private final JwtService jwtService;
 
     private final String NOMBRE_ROL_CLIENTE = "CLIENTE";
 
-    public Mono<Usuario> validarCreacionUsuario(Usuario usuario){
+    public Mono<Usuario> validarCreacionUsuario(Usuario usuario) {
         return validarCorreoElectronicoCrearUsuario(usuario)
                 .then(validarSalarioBase(usuario.getSalarioBase()))
                 .then(existeRolPorNombre(NOMBRE_ROL_CLIENTE))
                 .map(rol -> {
                     usuario.setIdRol(rol.getId());
                     return usuario;
-                });
+                })
+                .flatMap(usuarioClaveEncriptada -> jwtService.encriptarClave(usuarioClaveEncriptada.getClave())
+                        .map(claveEncriptada -> {
+                            usuarioClaveEncriptada.setClave(claveEncriptada);
+                            return usuarioClaveEncriptada;
+                        }));
     }
 
     private Mono<Void> validarCorreoElectronicoCrearUsuario(Usuario usuario) {
@@ -43,12 +51,12 @@ public class UsuarioValidator {
         return Mono.empty();
     }
 
-    private Mono<Rol> existeRolPorNombre(String nombre){
+    private Mono<Rol> existeRolPorNombre(String nombre) {
         return rolRepository.findByNombre(nombre)
                 .switchIfEmpty(Mono.error(new RolPorNombreNoEncontradoException(nombre)));
     }
 
-    public Mono<Usuario> validarEdicionUsuario(Usuario usuario){
+    public Mono<Usuario> validarEdicionUsuario(Usuario usuario) {
         return existeUsuarioPorId(usuario.getId())
                 .flatMap(existingUser ->
                         Mono.when(
@@ -58,6 +66,7 @@ public class UsuarioValidator {
                 )
                 .map(existingUser -> {
                     usuario.setIdRol(existingUser.getIdRol());
+                    usuario.setClave(existingUser.getClave());
                     return usuario;
                 });
     }

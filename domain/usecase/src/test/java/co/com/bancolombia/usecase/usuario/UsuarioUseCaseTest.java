@@ -1,10 +1,11 @@
 package co.com.bancolombia.usecase.usuario;
 
+import co.com.bancolombia.model.jwt.gateways.JwtService;
 import co.com.bancolombia.model.rol.Rol;
 import co.com.bancolombia.model.rol.gateways.RolRepository;
 import co.com.bancolombia.model.usuario.Usuario;
+import co.com.bancolombia.model.usuario.exception.*;
 import co.com.bancolombia.model.usuario.gateways.UsuarioRepository;
-import co.com.bancolombia.usecase.usuario.exception.*;
 import co.com.bancolombia.usecase.usuario.validator.UsuarioValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,6 +28,7 @@ class UsuarioUseCaseTest {
 
     private UsuarioRepository repository;
     private RolRepository rolRepository;
+    private JwtService jwtService;
     private UsuarioUseCase useCase;
     private Usuario usuario;
     private Rol rol;
@@ -37,7 +39,7 @@ class UsuarioUseCaseTest {
      void setUp() {
         repository = Mockito.mock(UsuarioRepository.class);
         rolRepository = Mockito.mock(RolRepository.class);
-        UsuarioValidator validator = new UsuarioValidator(repository, rolRepository);
+        UsuarioValidator validator = new UsuarioValidator(repository, rolRepository, jwtService);
         useCase = new UsuarioUseCase(repository, validator);
 
         usuario = new Usuario();
@@ -46,6 +48,7 @@ class UsuarioUseCaseTest {
         usuario.setApellidos("Paternina");
         usuario.setDocumentoIdentificacion("1003717195");
         usuario.setCorreoElectronico("camilo@example.com");
+        usuario.setClave("12345678");
         usuario.setFechaNacimiento(LocalDate.of(1995, 8, 15));
         usuario.setSalarioBase(BigDecimal.valueOf(3500000));
 

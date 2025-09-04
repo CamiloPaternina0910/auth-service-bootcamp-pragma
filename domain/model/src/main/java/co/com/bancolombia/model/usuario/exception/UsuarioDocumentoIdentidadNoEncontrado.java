@@ -1,6 +1,8 @@
-package co.com.bancolombia.usecase.usuario.exception;
+package co.com.bancolombia.model.usuario.exception;
 
-public class UsuarioDocumentoIdentidadNoEncontrado extends DominioException{
+import co.com.bancolombia.model.exception.DominioException;
+
+public class UsuarioDocumentoIdentidadNoEncontrado extends DominioException {
     private static final int HTTP_STATUS_NOT_FOUND = 404;
     public UsuarioDocumentoIdentidadNoEncontrado(String documentoIdentificacion){
         super(

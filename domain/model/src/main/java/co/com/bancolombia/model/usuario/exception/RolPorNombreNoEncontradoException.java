@@ -1,6 +1,8 @@
-package co.com.bancolombia.usecase.usuario.exception;
+package co.com.bancolombia.model.usuario.exception;
 
-public class RolPorNombreNoEncontradoException extends DominioException{
+import co.com.bancolombia.model.exception.DominioException;
+
+public class RolPorNombreNoEncontradoException extends DominioException {
 
     private static final int HTTP_STATUS_NOT_FOUND = 404;
     public RolPorNombreNoEncontradoException(String nombre){

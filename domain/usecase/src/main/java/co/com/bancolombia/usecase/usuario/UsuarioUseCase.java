@@ -30,6 +30,10 @@ public class UsuarioUseCase {
         return usuarioValidator.existeUsuarioPorDocumentoIdentificacion(documentoIdentificacion);
     }
 
+    public  Mono<Usuario> findByCorreoElectronico(String correoElectronico){
+        return usuarioRepository.findByCorreoElectronico(correoElectronico);
+    }
+
     public Mono<Usuario> update(Usuario usuario) {
         return usuarioValidator.validarEdicionUsuario(usuario)
                         .then(usuarioRepository.update(usuario));

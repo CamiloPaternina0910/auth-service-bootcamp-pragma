@@ -1,4 +1,4 @@
-package co.com.bancolombia.api.dto;
+package co.com.bancolombia.api.usuario.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
@@ -23,6 +23,10 @@ public class CrearUsuarioDto {
     @Email(message = "El correo electrónico debe ser válido")
     @Schema(description = "Correo electrónico", example = "camilo.paternina@example.com")
     private String correoElectronico;
+
+    @NotBlank(message = "La clave es requerida")
+    @Schema(description = "Clave del usuario", example = "123vc56Cy-")
+    private String clave;
 
     @NotBlank(message = "El documento de identificación es obligatorio")
     @Schema(description = "Documento de identificación del usuario", example = "10031232527")

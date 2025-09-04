@@ -1,6 +1,8 @@
-package co.com.bancolombia.usecase.usuario.exception;
+package co.com.bancolombia.model.usuario.exception;
 
-public class CorreoElectronicoDuplicadoException extends DominioException{
+import co.com.bancolombia.model.exception.DominioException;
+
+public class CorreoElectronicoDuplicadoException extends DominioException {
 
     private static final int HTTP_STATUS_BAD_REQUEST = 400;
 

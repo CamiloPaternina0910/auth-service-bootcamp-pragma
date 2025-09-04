@@ -34,6 +34,8 @@ public class UsuarioEntity {
 
     private String telefono;
 
+    private String clave;
+
     private BigDecimal salarioBase;
 
     private String idRol;

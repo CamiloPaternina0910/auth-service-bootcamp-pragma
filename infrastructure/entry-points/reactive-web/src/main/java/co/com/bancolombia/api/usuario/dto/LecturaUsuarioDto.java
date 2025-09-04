@@ -1,4 +1,4 @@
-package co.com.bancolombia.api.dto;
+package co.com.bancolombia.api.usuario.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;

@@ -1,4 +1,6 @@
-package co.com.bancolombia.usecase.usuario.exception;
+package co.com.bancolombia.model.usuario.exception;
+
+import co.com.bancolombia.model.exception.DominioException;
 
 public class SalarioInvalidoException extends DominioException {
 

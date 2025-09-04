@@ -1,30 +1,40 @@
-package co.com.bancolombia.api;
+package co.com.bancolombia.api.usuario;
 
-import co.com.bancolombia.api.dto.CrearUsuarioDto;
-import co.com.bancolombia.api.dto.EditarUsuarioDto;
+import co.com.bancolombia.api.ReactiveValidator;
+import co.com.bancolombia.api.usuario.dto.CrearUsuarioDto;
+import co.com.bancolombia.api.usuario.dto.EditarUsuarioDto;
 import co.com.bancolombia.api.mapper.UsuarioMapper;
 import co.com.bancolombia.model.usuario.Usuario;
 import co.com.bancolombia.usecase.usuario.UsuarioUseCase;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
-public class Handler {
+public class UsuarioHandler {
 
     private final UsuarioUseCase usuarioUseCase;
     private final UsuarioMapper usuarioMapper;
     private final ReactiveValidator reactiveValidator;
+    private final PasswordEncoder passwordEncoder;
 
     public Mono<ServerResponse> listenSaveUser(ServerRequest serverRequest) {
         return serverRequest.bodyToMono(CrearUsuarioDto.class)
                 .flatMap(reactiveValidator::validate)
-                .map(usuarioMapper::toModel)
+                .map(usuarioDto -> {
+                    Usuario usuario = usuarioMapper.toModel(usuarioDto);
+                    usuario.setClave(passwordEncoder.encode(usuario.getClave()));
+                    return usuario;
+                })
                 .flatMap(usuarioUseCase::save)
+                .map(usuarioMapper::toResponse)
                 .flatMap(savedUser -> ServerResponse.ok()
                         .contentType(MediaType.APPLICATION_JSON)
                         .bodyValue(savedUser));

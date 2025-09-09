@@ -14,10 +14,9 @@ public class UsuarioUseCaseConfig {
 
     private final UsuarioRepository usuarioRepository;
     private final RolRepository rolRepository;
-    private final JwtService jwtService;
 
     @Bean
     public UsuarioValidator usuarioValidator() {
-        return new UsuarioValidator(usuarioRepository, rolRepository, jwtService);
+        return new UsuarioValidator(usuarioRepository, rolRepository);
     }
 }

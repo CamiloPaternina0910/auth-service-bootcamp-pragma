@@ -1,7 +1,11 @@
 package co.com.bancolombia.usecase.jwt;
 
 import co.com.bancolombia.model.jwt.exception.CredencialesInvalidasException;
-import co.com.bancolombia.model.jwt.gateways.JwtService;
+import co.com.bancolombia.model.jwt.gateways.JwtHelper;
+import co.com.bancolombia.model.jwt.gateways.PasswordEncryptor;
+import co.com.bancolombia.model.usuario.Usuario;
+import co.com.bancolombia.model.usuario.gateways.UsuarioRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -10,75 +14,99 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class JwtUseCaseTest {
+
     @Mock
-    private JwtService jwtService;
+    private UsuarioRepository usuarioRepository;
+
+    @Mock
+    private JwtHelper jwtHelper;
+
+    @Mock
+    private PasswordEncryptor passwordEncryptor;
 
     @InjectMocks
     private JwtUseCase jwtUseCase;
 
+    private Usuario usuarioValido;
     private final String CORREO_VALIDO = "usuario@test.com";
     private final String CLAVE_VALIDA = "clave123";
-    private final String TOKEN_JWT = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...";
+    private final String CLAVE_INVALIDA = "claveIncorrecta";
+    private final String TOKEN_JWT = "token.jwt.generado";
+
+    @BeforeEach
+    void setUp() {
+        usuarioValido = new Usuario();
+        usuarioValido.setClave("claveEncriptada");
+        usuarioValido.setCorreoElectronico(CORREO_VALIDO);
+    }
 
     @Test
-    void testLogearExitoso() {
-        when(jwtService.logear(CORREO_VALIDO, CLAVE_VALIDA))
+    void logear_UsuarioExistenteYClaveCorrecta_DeberiaGenerarToken() {
+        when(usuarioRepository.findByCorreoElectronico(CORREO_VALIDO))
+                .thenReturn(Mono.just(usuarioValido));
+        when(passwordEncryptor.verifyPassword(CLAVE_VALIDA, usuarioValido.getClave()))
+                .thenReturn(Mono.just(true));
+        when(jwtHelper.generarToken(usuarioValido))
                 .thenReturn(Mono.just(TOKEN_JWT));
 
         StepVerifier.create(jwtUseCase.logear(CORREO_VALIDO, CLAVE_VALIDA))
                 .expectNext(TOKEN_JWT)
                 .verifyComplete();
-
-        verify(jwtService).logear(CORREO_VALIDO, CLAVE_VALIDA);
     }
 
     @Test
-    void testLogearConCredencialesInvalidas() {
-        when(jwtService.logear(CORREO_VALIDO, "clave-incorrecta"))
-                .thenReturn(Mono.error(new CredencialesInvalidasException()));
+    void logear_UsuarioNoExistente_DeberiaLanzarCredencialesInvalidasException() {
+        when(usuarioRepository.findByCorreoElectronico(CORREO_VALIDO))
+                .thenReturn(Mono.empty());
 
-        StepVerifier.create(jwtUseCase.logear(CORREO_VALIDO, "clave-incorrecta"))
+        StepVerifier.create(jwtUseCase.logear(CORREO_VALIDO, CLAVE_VALIDA))
                 .expectError(CredencialesInvalidasException.class)
                 .verify();
-
-        verify(jwtService).logear(CORREO_VALIDO, "clave-incorrecta");
     }
 
     @Test
-    void testLogearConErrorInesperado() {
-        when(jwtService.logear(CORREO_VALIDO, CLAVE_VALIDA))
-                .thenReturn(Mono.error(new RuntimeException("Error de conexión")));
+    void logear_ClaveIncorrecta_DeberiaLanzarCredencialesInvalidasException() {
+        when(usuarioRepository.findByCorreoElectronico(CORREO_VALIDO))
+                .thenReturn(Mono.just(usuarioValido));
+        when(passwordEncryptor.verifyPassword(CLAVE_INVALIDA, usuarioValido.getClave()))
+                .thenReturn(Mono.just(false));
+
+        StepVerifier.create(jwtUseCase.logear(CORREO_VALIDO, CLAVE_INVALIDA))
+                .expectError(CredencialesInvalidasException.class)
+                .verify();
+    }
+
+    @Test
+    void logear_ErrorEnVerificacionPassword_DeberiaPropagarError() {
+        RuntimeException error = new RuntimeException("Error en encriptación");
+
+        when(usuarioRepository.findByCorreoElectronico(CORREO_VALIDO))
+                .thenReturn(Mono.just(usuarioValido));
+        when(passwordEncryptor.verifyPassword(CLAVE_VALIDA, usuarioValido.getClave()))
+                .thenReturn(Mono.error(error));
 
         StepVerifier.create(jwtUseCase.logear(CORREO_VALIDO, CLAVE_VALIDA))
                 .expectError(RuntimeException.class)
                 .verify();
-
-        verify(jwtService).logear(CORREO_VALIDO, CLAVE_VALIDA);
     }
 
     @Test
-    void testLogearDelegaCorrectamenteAlService() {
-        when(jwtService.logear(anyString(), anyString()))
-                .thenReturn(Mono.just(TOKEN_JWT));
+    void logear_ErrorEnGeneracionToken_DeberiaPropagarError() {
+        RuntimeException error = new RuntimeException("Error generando token");
 
-        jwtUseCase.logear(CORREO_VALIDO, CLAVE_VALIDA).block();
+        when(usuarioRepository.findByCorreoElectronico(CORREO_VALIDO))
+                .thenReturn(Mono.just(usuarioValido));
+        when(passwordEncryptor.verifyPassword(CLAVE_VALIDA, usuarioValido.getClave()))
+                .thenReturn(Mono.just(true));
+        when(jwtHelper.generarToken(usuarioValido))
+                .thenReturn(Mono.error(error));
 
-        verify(jwtService).logear(CORREO_VALIDO, CLAVE_VALIDA);
-    }
-
-    @Test
-    void testLogearConParametrosNulos() {
-        when(jwtService.logear(null, CLAVE_VALIDA))
-                .thenReturn(Mono.error(new NullPointerException()));
-
-        StepVerifier.create(jwtUseCase.logear(null, CLAVE_VALIDA))
-                .expectError(NullPointerException.class)
+        StepVerifier.create(jwtUseCase.logear(CORREO_VALIDO, CLAVE_VALIDA))
+                .expectError(RuntimeException.class)
                 .verify();
     }
 }

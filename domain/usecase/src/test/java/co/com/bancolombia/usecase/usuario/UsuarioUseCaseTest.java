@@ -1,6 +1,6 @@
 package co.com.bancolombia.usecase.usuario;
 
-import co.com.bancolombia.model.jwt.gateways.JwtService;
+import co.com.bancolombia.model.jwt.gateways.PasswordEncryptor;
 import co.com.bancolombia.model.rol.Rol;
 import co.com.bancolombia.model.rol.gateways.RolRepository;
 import co.com.bancolombia.model.usuario.Usuario;
@@ -28,7 +28,7 @@ class UsuarioUseCaseTest {
 
     private UsuarioRepository repository;
     private RolRepository rolRepository;
-    private JwtService jwtService;
+    private PasswordEncryptor passwordEncryptor;
     private UsuarioUseCase useCase;
     private Usuario usuario;
     private Rol rol;
@@ -36,11 +36,12 @@ class UsuarioUseCaseTest {
     private final String NOMBRE_ROL_CLIENTE = "CLIENTE";
 
     @BeforeEach
-     void setUp() {
+    void setUp() {
         repository = Mockito.mock(UsuarioRepository.class);
         rolRepository = Mockito.mock(RolRepository.class);
-        UsuarioValidator validator = new UsuarioValidator(repository, rolRepository, jwtService);
-        useCase = new UsuarioUseCase(repository, validator);
+        passwordEncryptor = Mockito.mock(PasswordEncryptor.class);
+        UsuarioValidator validator = new UsuarioValidator(repository, rolRepository);
+        useCase = new UsuarioUseCase(repository, validator, passwordEncryptor);
 
         usuario = new Usuario();
         usuario.setId("1");
@@ -58,6 +59,7 @@ class UsuarioUseCaseTest {
     @Test
     void saveUsuario_success() {
         when(rolRepository.findByNombre(NOMBRE_ROL_CLIENTE)).thenReturn(Mono.just(rol));
+        when(passwordEncryptor.encryptPassword(anyString())).thenReturn(Mono.just("claveEncriptada"));
         when(repository.findByCorreoElectronico("camilo@example.com"))
                 .thenReturn(Mono.empty());
         when(repository.save(any(Usuario.class)))

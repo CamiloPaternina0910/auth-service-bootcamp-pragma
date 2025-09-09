@@ -17,7 +17,6 @@ public class UsuarioValidator {
 
     private final UsuarioRepository usuarioRepository;
     private final RolRepository rolRepository;
-    private final JwtService jwtService;
 
     private final String NOMBRE_ROL_CLIENTE = "CLIENTE";
 
@@ -28,12 +27,7 @@ public class UsuarioValidator {
                 .map(rol -> {
                     usuario.setIdRol(rol.getId());
                     return usuario;
-                })
-                .flatMap(usuarioClaveEncriptada -> jwtService.encriptarClave(usuarioClaveEncriptada.getClave())
-                        .map(claveEncriptada -> {
-                            usuarioClaveEncriptada.setClave(claveEncriptada);
-                            return usuarioClaveEncriptada;
-                        }));
+                });
     }
 
     private Mono<Void> validarCorreoElectronicoCrearUsuario(Usuario usuario) {

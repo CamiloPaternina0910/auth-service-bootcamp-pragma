@@ -1,5 +1,7 @@
 package co.com.bancolombia.usecase.usuario;
 
+import co.com.bancolombia.model.jwt.gateways.JwtService;
+import co.com.bancolombia.model.jwt.gateways.PasswordEncryptor;
 import co.com.bancolombia.model.usuario.Usuario;
 import co.com.bancolombia.model.usuario.gateways.UsuarioRepository;
 import co.com.bancolombia.usecase.usuario.validator.UsuarioValidator;
@@ -12,9 +14,15 @@ public class UsuarioUseCase {
 
     private final UsuarioRepository usuarioRepository;
     private final UsuarioValidator usuarioValidator;
+    private final PasswordEncryptor passwordEncryptor;
 
     public Mono<Usuario> save(Usuario usuario) {
         return usuarioValidator.validarCreacionUsuario(usuario)
+                .flatMap(usuarioToSave -> passwordEncryptor.encryptPassword(usuarioToSave.getClave())
+                        .map(claveCifrada -> {
+                            usuarioToSave.setClave(claveCifrada);
+                            return usuarioToSave;
+                        }))
                 .then(usuarioRepository.save(usuario));
     }
 
@@ -30,13 +38,9 @@ public class UsuarioUseCase {
         return usuarioValidator.existeUsuarioPorDocumentoIdentificacion(documentoIdentificacion);
     }
 
-    public  Mono<Usuario> findByCorreoElectronico(String correoElectronico){
-        return usuarioRepository.findByCorreoElectronico(correoElectronico);
-    }
-
     public Mono<Usuario> update(Usuario usuario) {
         return usuarioValidator.validarEdicionUsuario(usuario)
-                        .then(usuarioRepository.update(usuario));
+                .then(usuarioRepository.update(usuario));
     }
 
     public Mono<Void> delete(String id) {

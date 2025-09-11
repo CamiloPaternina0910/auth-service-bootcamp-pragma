@@ -1,7 +1,7 @@
 package co.com.bancolombia.api;
 
 
-import co.com.bancolombia.usecase.usuario.exception.DominioException;
+import co.com.bancolombia.model.exception.DominioException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
@@ -29,6 +29,7 @@ public class GlobalExceptionHandler implements WebExceptionHandler {
         } else if (ex instanceof DominioException dominioException) {
             status = HttpStatus.valueOf(dominioException.getEstado());
         } else {
+            log.error(ex.getMessage());
             status = HttpStatus.INTERNAL_SERVER_ERROR;
             message = "Algo salió mal, comuniquese con el equipo de soporte.";
         }

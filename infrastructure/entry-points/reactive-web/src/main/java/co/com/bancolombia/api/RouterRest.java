@@ -1,8 +1,11 @@
 package co.com.bancolombia.api;
 
-import co.com.bancolombia.api.dto.CrearUsuarioDto;
-import co.com.bancolombia.api.dto.EditarUsuarioDto;
-import co.com.bancolombia.api.dto.LecturaUsuarioDto;
+import co.com.bancolombia.api.login.LoginHandler;
+import co.com.bancolombia.api.login.dto.LoginDto;
+import co.com.bancolombia.api.usuario.UsuarioHandler;
+import co.com.bancolombia.api.usuario.dto.CrearUsuarioDto;
+import co.com.bancolombia.api.usuario.dto.EditarUsuarioDto;
+import co.com.bancolombia.api.usuario.dto.LecturaUsuarioDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -32,7 +35,11 @@ public class RouterRest {
     private final String PATH_USUARIO_ID = "/api/v1/usuarios/{id}";
     private final String PATH_USUARIO_DOCUMENTO = "/api/v1/usuarios/documentoIdentificacion/{documentoIdentificacion}";
 
-    private final Handler usuarioHandler;
+    private final String PATH_LOGIN = "/api/v1/login";
+
+    private final UsuarioHandler usuarioHandler;
+
+    private final LoginHandler loginHandler;
 
     @Bean
     @RouterOperations({
@@ -40,7 +47,7 @@ public class RouterRest {
             @RouterOperation(
                     path = PATH_USUARIO,
                     method = RequestMethod.POST,
-                    beanClass = Handler.class,
+                    beanClass = UsuarioHandler.class,
                     beanMethod = "listenSaveUser",
                     operation = @Operation(
                             operationId = "saveUsuario",
@@ -80,7 +87,7 @@ public class RouterRest {
             @RouterOperation(
                     path = PATH_USUARIO,
                     method = RequestMethod.GET,
-                    beanClass = Handler.class,
+                    beanClass = UsuarioHandler.class,
                     beanMethod = "listenFindAllUser",
                     operation = @Operation(
                             operationId = "findAllUsuarios",
@@ -99,7 +106,7 @@ public class RouterRest {
             @RouterOperation(
                     path = PATH_USUARIO_ID,
                     method = RequestMethod.GET,
-                    beanClass = Handler.class,
+                    beanClass = UsuarioHandler.class,
                     beanMethod = "listenFindUserById",
                     operation = @Operation(
                             operationId = "findUsuarioById",
@@ -120,7 +127,7 @@ public class RouterRest {
             @RouterOperation(
                     path = PATH_USUARIO_DOCUMENTO,
                     method = RequestMethod.GET,
-                    beanClass = Handler.class,
+                    beanClass = UsuarioHandler.class,
                     beanMethod = "listenFindUserByDocumentoIdentificacion",
                     operation = @Operation(
                             operationId = "findUsuarioByDocumentoIdentificacion",
@@ -141,7 +148,7 @@ public class RouterRest {
             @RouterOperation(
                     path = PATH_USUARIO,
                     method = RequestMethod.PUT,
-                    beanClass = Handler.class,
+                    beanClass = UsuarioHandler.class,
                     beanMethod = "listenUpdateUser",
                     operation = @Operation(
                             operationId = "updateUsuario",
@@ -181,7 +188,7 @@ public class RouterRest {
             @RouterOperation(
                     path = PATH_USUARIO_ID,
                     method = RequestMethod.DELETE,
-                    beanClass = Handler.class,
+                    beanClass = UsuarioHandler.class,
                     beanMethod = "listenDeleteUserById",
                     operation = @Operation(
                             operationId = "deleteUsuario",
@@ -193,15 +200,57 @@ public class RouterRest {
                                     @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
                             }
                     )
+            ),
+            // Login - ¡NUEVA OPERACIÓN!
+            @RouterOperation(
+                    path = PATH_LOGIN,
+                    method = RequestMethod.POST,
+                    beanClass = LoginHandler.class,
+                    beanMethod = "listenLogin",
+                    operation = @Operation(
+                            operationId = "login",
+                            summary = "Iniciar sesión",
+                            tags = {"Autenticación"},
+                            requestBody = @RequestBody(
+                                    required = true,
+                                    description = "Credenciales de acceso",
+                                    content = @Content(
+                                            mediaType = "application/json",
+                                            schema = @Schema(implementation = LoginDto.class),
+                                            examples = @ExampleObject(
+                                                    name = "Ejemplo login",
+                                                    value = "{\n" +
+                                                            "  \"correoElectronico\": \"usuario@example.com\",\n" +
+                                                            "  \"clave\": \"miClaveSegura123\"\n" +
+                                                            "}"
+                                            )
+                                    )
+                            ),
+                            responses = {
+                                    @ApiResponse(
+                                            responseCode = "200",
+                                            description = "Login exitoso",
+                                            content = @Content(
+                                                    schema = @Schema(implementation = String.class),
+                                                    examples = @ExampleObject(
+                                                            name = "Respuesta exitosa",
+                                                            value = "\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\""
+                                                    )
+                                            )
+                                    ),
+                                    @ApiResponse(responseCode = "401", description = "Credenciales inválidas"),
+                                    @ApiResponse(responseCode = "400", description = "Datos inválidos")
+                            }
+                    )
             )
     })
-    public RouterFunction<ServerResponse> usuarioRoutes(Handler handler) {
-        return route(POST(PATH_USUARIO), usuarioHandler::listenSaveUser)
-                .andRoute(GET(PATH_USUARIO), usuarioHandler::listenFindAllUser)
-                .andRoute(GET(PATH_USUARIO_ID), usuarioHandler::listenFindUserById)
-                .andRoute(GET(PATH_USUARIO_DOCUMENTO), usuarioHandler::listenFindUserByDocumentoIdentificacion)
-                .andRoute(PUT(PATH_USUARIO), usuarioHandler::listenUpdateUser)
-                .andRoute(DELETE(PATH_USUARIO_ID), usuarioHandler::listenDeleteUserById);
+    public RouterFunction<ServerResponse> usuarioRoutes(UsuarioHandler usuarioHandler) {
+        return route(POST(PATH_USUARIO), this.usuarioHandler::listenSaveUser)
+                .andRoute(GET(PATH_USUARIO), this.usuarioHandler::listenFindAllUser)
+                .andRoute(GET(PATH_USUARIO_ID), this.usuarioHandler::listenFindUserById)
+                .andRoute(GET(PATH_USUARIO_DOCUMENTO), this.usuarioHandler::listenFindUserByDocumentoIdentificacion)
+                .andRoute(PUT(PATH_USUARIO), this.usuarioHandler::listenUpdateUser)
+                .andRoute(DELETE(PATH_USUARIO_ID), this.usuarioHandler::listenDeleteUserById)
+                .andRoute(POST(PATH_LOGIN), this.loginHandler::listenLogin);
     }
-
 }

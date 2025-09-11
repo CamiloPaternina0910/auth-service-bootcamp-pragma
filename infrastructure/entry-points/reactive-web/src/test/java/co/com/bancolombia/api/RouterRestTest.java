@@ -1,7 +1,8 @@
 package co.com.bancolombia.api;
 
-import co.com.bancolombia.api.dto.CrearUsuarioDto;
-import co.com.bancolombia.api.dto.EditarUsuarioDto;
+import co.com.bancolombia.api.usuario.UsuarioHandler;
+import co.com.bancolombia.api.usuario.dto.CrearUsuarioDto;
+import co.com.bancolombia.api.usuario.dto.EditarUsuarioDto;
 import co.com.bancolombia.api.mapper.UsuarioMapper;
 import co.com.bancolombia.model.usuario.Usuario;
 import co.com.bancolombia.usecase.usuario.UsuarioUseCase;
@@ -24,7 +25,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @WebFluxTest
-@ContextConfiguration(classes = {RouterRest.class, Handler.class})
+@ContextConfiguration(classes = {RouterRest.class, UsuarioHandler.class})
 @TestConstructor(autowireMode = AutowireMode.ALL)
 class RouterRestTest {
 

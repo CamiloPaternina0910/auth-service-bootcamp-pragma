@@ -31,4 +31,8 @@ public class Usuario {
     private String telefono;
 
     private BigDecimal salarioBase;
+
+    private String idRol;
+
+    private String clave;
 }
